@@ -1,0 +1,60 @@
+#!/bin/sh
+#
+# Configured as part of the DigitalOcean 1-Click Image build process
+
+if [ -f /etc/border0/border0.yaml ]; then
+
+
+# Define the service name
+serviceName="border0.service"
+
+# Check if the service unit file exists in the systemd system directory or local configuration
+if [ -f /etc/systemd/system/${serviceName} ] || [ -f /lib/systemd/system/${serviceName} ] || [ -f /usr/lib/systemd/system/${serviceName} ]; then
+    B0_STATUS="service is installed.\nUse 'systemctl status border0' for details."
+else
+    B0_STATUS="service is not installed, but some configs are present...\nIncomplete install? Use 'border0-install.sh' to install the service."
+fi
+
+myip=$(hostname -I | awk '{print$1}')
+cat <<EOF
+********************************************************************************
+
+This is DigitalOcean's 1-Click Border0 Droplet.
+To keep this Droplet secure, the UFW firewall is enabled.
+All ports are BLOCKED except 22 (SSH)
+
+Border0 Connector $(echo $B0_STATUS)
+
+Please navigate to the Admin portal for further configuration and management
+
+https://portal.border0.com
+
+********************************************************************************
+To delete this message of the day: rm -rf $(readlink -f ${0})
+EOF
+
+else
+# looks like this is fresh 1-c droplet
+myip=$(hostname -I | awk '{print$1}')
+cat <<EOF
+********************************************************************************
+
+This is DigitalOcean's 1-Click Border0 Droplet.
+To keep this Droplet secure, the UFW firewall is enabled.
+All ports are BLOCKED except 22 (SSH)
+
+We will execute border0-install.sh wizard script for you
+This will install border0 Conenctor service on this system.
+For more info: https://docs.border0.com/docs/border0-connector
+
+Optional, second step is enabling Digital-Ocean Plugin and initializing doctl toolset.
+We will need to create API token for that.
+https://docs.digitalocean.com/reference/api/create-personal-access-token/
+
+NOTE: Please use read-only token, Border0 does not require write access to your account.
+
+********************************************************************************
+To delete this message of the day: rm -rf $(readlink -f ${0})
+EOF
+
+fi
